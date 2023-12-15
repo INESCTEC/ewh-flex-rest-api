@@ -41,3 +41,12 @@ With a local python interpreter, you'll need to manually install dependencies:
 ## How to run
 
 In order to run and test this REST API implementation, run the provided file ``app.py``
+
+***
+
+## Contacts
+
+If you have any questions regarding this project, please contact the following people:
+
+**Developers (SW source code / methodology questions)**:
+* José Paulos (jose.paulos@inesctec.pt)
