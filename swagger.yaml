@@ -1,0 +1,419 @@
+openapi: 3.0.0
+info:
+  title: Electric Water Heater Flexibility API
+  description: |
+
+    OpenAPI specifications for **INESC TEC Enershare Electric Water Heater Flexibility API**.  
+
+    Welcome to our OpenAPI documentation for the INESC TEC Enershare Electric Water Heater Flexibility API. 
+
+    This REST API provides endpoints for initiating a request for Electric Water Heater (EWH) load optimization, and for
+    retrieving the result, respectively.
+
+
+    **This documentation will guide you through:**
+
+    1. **Request EWH Simulations**:  Initiates a request for load optimization for a specific Electric Water Heater. 
+    Users can provide the EWH specifications (power, maximum allowed water temperature, capacity), desired hot water
+    comfort temperature, and a time schedule during which the optimization should occur.
+
+    2. **Retrieve EWH Simulations Result**: Retrieves the result of a previously initiated Electric Water Heater load
+    optimization request based on the provided request ID.
+
+
+    **Developers // Contacts:**
+    - José Paulos (jose.paulos@inesctec.pt)
+  version: 0.1.0
+paths:
+  /api/ewh/request:
+    post:
+      tags:
+        - api
+      summary: Create Order
+      description: Endpoint to Get EWH Simulation Results
+      operationId: create_order_api_ewh_request_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrderResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '500':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceUnavailableResponse'
+  /api/ewh/result:
+    get:
+      tags:
+        - api
+      summary: Get Order
+      description: Endpoint to Get EWH Simulation Results
+      operationId: get_order_api_ewh_result_get
+      parameters:
+        - name: order_id
+          in: query
+          required: true
+          schema:
+            type: string
+            title: Order Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetOrderResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '500':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
+        '503':
+          description: Service Unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceUnavailableResponse'
+components:
+  schemas:
+    BadRequestResponse:
+      properties:
+        error_message:
+          type: string
+          title: Error Message
+          description: Status code for bad request (missing or wrong inputs)
+      type: object
+      required:
+        - error_message
+      title: BadRequestResponse
+    CalendarField:
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+        hot_water_usage:
+          type: number
+          title: Hot Water Usage
+      type: object
+      required:
+        - timestamp
+        - hot_water_usage
+      title: CalendarField
+    CreateOrderRequest:
+      properties:
+        user:
+          type: string
+          title: User
+          description: User Identification
+        datetime_start:
+          type: string
+          format: date-time
+          title: Datetime Start
+          description: Start date of the period to be optimized
+        datetime_end:
+          type: string
+          format: date-time
+          title: Datetime End
+          description: End date of the period to be optimized
+        ewh_specs:
+          anyOf:
+            - $ref: '#/components/schemas/EWHSpecs'
+          description: EWH Specifications
+      type: object
+      required:
+        - user
+        - datetime_start
+        - datetime_end
+        - ewh_specs
+      title: CreateOrderRequest
+    CreateOrderResponse:
+      properties:
+        order_id:
+          type: string
+          title: Order Id
+          description: Automatically created token that identifies the requested order
+        order_status:
+          type: string
+          title: Order Status
+          description: Current order status
+        message:
+          type: string
+          title: Message
+          description: Current order status message
+      type: object
+      required:
+        - order_id
+        - order_status
+        - message
+      title: CreateOrderResponse
+    EWHSpecs:
+      properties:
+        ewh_capacity:
+          type: integer
+          title: Ewh Capacity
+          description: EWH capacity (l)
+        ewh_power:
+          type: integer
+          title: Ewh Power
+          description: EWH heating power (W)
+        ewh_max_temp:
+          type: integer
+          title: Ewh Max Temp
+          description: EWH maximum allowed water temperature
+        user_comf_temp:
+          type: integer
+          title: User Comf Temp
+          description: Hot-Water Usage Comfort Temperature (minimum user-defined temperature - °C)
+        tariff:
+          type: integer
+          title: Tariff
+          description: Tariff selection between simple (1) or dual (2)
+        price_simple:
+          type: number
+          title: Price Simple
+          description: Simple pricing value per kWh
+        price_dual_day:
+          type: number
+          title: Price Dual Day
+          description: 'Dual day pricing value per kWh '
+        price_dual_night:
+          type: number
+          title: Price Dual Night
+          description: Dual night pricing value per kWh
+        tariff_simple:
+          type: number
+          title: Tariff Simple
+          description: Fixed daily simple tariff pricing
+        tariff_dual:
+          type: number
+          title: Tariff Dual
+          description: Fixed daily dual tariff pricing
+      type: object
+      required:
+        - ewh_capacity
+        - ewh_power
+        - ewh_max_temp
+        - user_comf_temp
+        - tariff
+        - price_simple
+        - price_dual_day
+        - price_dual_night
+        - tariff_simple
+        - tariff_dual
+      title: EWHSpecs
+    GetOrderResponse:
+      properties:
+        user:
+          type: string
+          title: User
+          description: User Identification
+        simulation_period:
+          allOf:
+            - $ref: '#/components/schemas/SimulationPeriodField'
+          description: Simulated/Optimized Period (minutes)
+        original_energy:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Total accumulated energy in kWh for the real measurement profile
+        optimized_energy:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Total accumulated energy in kWh for the optimized measurement profile
+        original_price:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Total cost in € for the real measurement profile
+        optimized_price:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Total cost in € for the optimized measurement profile
+        avg_daily_energy:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Average Daily Energy Consumption for the optimized scenario
+        total_flexibility:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Flexibility availability for the optimized period (minutes)
+        perc_flexibility:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Percentage of the total simulated period that can provide flexibility
+        avg_daily_flexibility:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Average flexibility availability for the optimized scenario
+        savings_cost:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Pricing savings between real and optimized scenarios
+        savings_energy:
+          allOf:
+            - $ref: '#/components/schemas/ValueUnitsField'
+          description: Energy savings between real and optimized scenarios
+        original_usage_profile:
+          items:
+            $ref: '#/components/schemas/RefUsageProfileField'
+          type: array
+          title: Original Usage Profile
+          description: Estimated hot-water usage profile based on EWH's real load diagram
+        optimized_calendar:
+          items:
+            $ref: '#/components/schemas/CalendarField'
+          type: array
+          title: Optimized Calendar
+          description: Optimized EWH functioning calendarization
+      type: object
+      required:
+        - user
+        - simulation_period
+        - original_energy
+        - optimized_energy
+        - original_price
+        - optimized_price
+        - avg_daily_energy
+        - total_flexibility
+        - perc_flexibility
+        - avg_daily_flexibility
+        - savings_cost
+        - savings_energy
+        - original_usage_profile
+        - optimized_calendar
+      title: GetOrderResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    InternalServerErrorResponse:
+      properties:
+        error_message:
+          type: string
+          title: Error Message
+          description: Status code for internal server error
+      type: object
+      required:
+        - error_message
+      title: InternalServerErrorResponse
+    RefUsageProfileField:
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          title: Timestamp
+        ewh_on:
+          type: number
+          title: Ewh On
+      type: object
+      required:
+        - timestamp
+        - ewh_on
+      title: RefUsageProfileField
+    ServiceUnavailableResponse:
+      properties:
+        error_message:
+          type: string
+          title: Error Message
+          description: Status code for service unavailability
+      type: object
+      required:
+        - error_message
+      title: ServiceUnavailableResponse
+    SimulationPeriodField:
+      properties:
+        start:
+          type: string
+          format: date-time
+          title: Start
+        end:
+          type: string
+          format: date-time
+          title: End
+        days_in_simulation:
+          type: integer
+          title: Days In Simulation
+      type: object
+      required:
+        - start
+        - end
+        - days_in_simulation
+      title: SimulationPeriodField
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+    ValueUnitsField:
+      properties:
+        value:
+          type: number
+          title: Value
+        unit:
+          type: string
+          title: Unit
+      type: object
+      required:
+        - value
+        - unit
+      title: ValueUnitsField
